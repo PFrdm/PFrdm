@@ -1,10 +1,10 @@
 - 👋 Hi, I’m Freedom
-- 👀 I’m interested in VirtualMachine and C++/Python/VBS
-- 🌱 I’m currently learning 
-- 💞️ I’m looking to collaborate on ...
-- 📫 How to reach me 
-- 😄 Pronouns: Idiot
-- ⚡ Fun fact: I 
+- 👀 I’m interested in VirtualMachine and C++/Python/VBS programming
+- 🌱 I’m currently learning Python
+- 💞️ I’m looking to collaborate on Github/[Dingtalk](https://workspace.dingtalk.com/rhwx1poeF6LjMcev6VVDPx)
+- 📫 How to reach me : [My Email](18678675130@163.com)
+- 😄 Pronouns: Breaker
+- ⚡ Fun fact: It seems like not yet
 
 <!---
 PFrdm/PFrdm is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
