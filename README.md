@@ -1,5 +1,5 @@
-- 👋 Hi, I’m Freedom
-- 👀 I’m interested in VirtualMachine and C++/Python/VBS programming
+- 👋 Hi, I’m Veyra
+- 👀 I’m interested in VirtualMachine, C++/Python/VBS programming and creating website
 - 🌱 I’m currently learning Python
 - 💞️ I’m looking to collaborate on Github/[Dingtalk](https://workspace.dingtalk.com/rhwx1poeF6LjMcev6VVDPx)
 - 📫 How to reach me : [My Email](18678675130@163.com)
