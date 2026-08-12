@@ -146,9 +146,6 @@
 <div class="container">
     <!-- 公告区 -->
     <div class="card">
-        <div class="notice-yellow">
-            🧑‍🎓 祝广大2026届高考考生顺顺利利，旗开得胜，马到成功！
-        </div>
         <div class="notice-blue">
             📢 【公告】由于钉钉个人版的下架，目前站主正在筹备转移至GitHub，本网站所有数据已于5月30日导出，届时本网站还会正常运行
         </div>
@@ -161,9 +158,7 @@
     <div class="card">
         <div class="code-block">
             <div class="code-line">title 网站已经运行 day count: <span class="blue" id="runDays">--</span> 天</div>
-            <div class="code-line">title 距离高考还有 day count: <span class="red" id="gaokaoDays">--</span> 天</div>
-            <div class="code-line">title 距离中考还有 day count: <span class="orange" id="zhongkaoDays">--</span> 天</div>
-            <div class="code-line">title 距离暑假还有 day count: <span class="blue" id="summerDays">--</span> 天</div>
+            <div class="code-line">title 距离开学还有 day count: <span class="blue" id="schoolDays">--</span> 天</div>
         </div>
     </div>
 
@@ -230,9 +225,7 @@
 
     // 更新显示
     document.getElementById('runDays').innerText = getRunDays();
-    document.getElementById('gaokaoDays').innerText = getDaysDiff('2026-06-07');
-    document.getElementById('zhongkaoDays').innerText = getDaysDiff('2026-06-12');
-    document.getElementById('summerDays').innerText = getDaysDiff('2026-07-12');
+    document.getElementById('schoolDays').innerText = getDaysDiff('2026-09-01');
 </script>
 </body>
 </html>
