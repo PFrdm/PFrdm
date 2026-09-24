@@ -4,228 +4,496 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veyra's Space · 个人主页</title>
+    
+    <!-- 防止页面闪烁的内联脚本 -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    
     <style>
+        /* ========== CSS 变量定义 ========== */
+        :root {
+            /* 浅色主题背景 */
+            --bg-gradient-start: #e0c3fc;
+            --bg-gradient-end: #8ec5fc;
+            
+            /* 玻璃基础变量 */
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            --glass-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            --glass-inner-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+            
+            /* 文本颜色 */
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --footer-text: rgba(44, 62, 80, 0.7);
+            
+            /* 标题特效色 */
+            --title-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            
+            /* 公告与标题微调 */
+            --notice-blue-bg: rgba(33, 150, 243, 0.15);
+            --notice-blue-border: #2196f3;
+            --notice-blue-text: #0d47a1;
+            
+            --notice-pink-bg: rgba(233, 30, 99, 0.12);
+            --notice-pink-border: #e91e63;
+            --notice-pink-text: #880e4f;
+            
+            --notice-yellow-bg: rgba(255, 193, 7, 0.18);
+            --notice-yellow-border: #ffc107;
+            --notice-yellow-text: #f57f17;
+        }
+
+        [data-theme="dark"] {
+            /* 深色主题背景 */
+            --bg-gradient-start: #0f2027;
+            --bg-gradient-end: #203a43;
+            
+            /* 深色玻璃基础变量 */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            --glass-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            --glass-inner-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+            
+            /* 文本颜色 */
+            --text-primary: #eceff1;
+            --text-secondary: #b0bec5;
+            --footer-text: rgba(236, 239, 241, 0.6);
+            
+            /* 标题特效色（深色更亮） */
+            --title-gradient: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            
+            /* 公告与标题微调（深色适配） */
+            --notice-blue-bg: rgba(33, 150, 243, 0.2);
+            --notice-blue-border: #64b5f6;
+            --notice-blue-text: #e3f2fd;
+            
+            --notice-pink-bg: rgba(233, 30, 99, 0.2);
+            --notice-pink-border: #f06292;
+            --notice-pink-text: #fce4ec;
+            
+            --notice-yellow-bg: rgba(255, 193, 7, 0.2);
+            --notice-yellow-border: #ffd54f;
+            --notice-yellow-text: #fffde7;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
-            padding: 2rem 1rem;
+            padding: 3rem 1.5rem;
+            transition: background 0.5s ease;
+            color: var(--text-primary);
+            position: relative;
+            overflow-x: hidden;
         }
 
+        /* 背景装饰色块，用于凸显玻璃折射效果 */
+        .bg-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            pointer-events: none;
+            transition: background 0.5s ease, opacity 0.5s ease;
+        }
+        .blob-1 { width: 500px; height: 500px; background: rgba(255, 154, 158, 0.5); top: -150px; left: -100px; }
+        .blob-2 { width: 600px; height: 600px; background: rgba(161, 196, 253, 0.5); bottom: -200px; right: -150px; }
+        .blob-3 { width: 400px; height: 400px; background: rgba(253, 252, 175, 0.4); top: 40%; left: 50%; transform: translateX(-50%); }
+
+        [data-theme="dark"] .blob-1 { background: rgba(138, 43, 226, 0.3); }
+        [data-theme="dark"] .blob-2 { background: rgba(0, 191, 255, 0.25); }
+        [data-theme="dark"] .blob-3 { background: rgba(255, 20, 147, 0.2); }
+        
         .container {
             max-width: 1000px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* ========== 核心：液态玻璃卡片样式 ========== */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                var(--glass-shadow), 
+                var(--glass-inner-highlight),
+                var(--glass-inner-shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* 卡片样式 - 保留你原来的风格 */
-        .card {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 15px 45px rgba(0, 0, 0, 0.12), 
+                var(--glass-inner-highlight),
+                var(--glass-inner-shadow);
+        }
+
+        [data-theme="dark"] .card:hover {
+            box-shadow: 
+                0 15px 45px rgba(0, 0, 0, 0.5), 
+                var(--glass-inner-highlight),
+                var(--glass-inner-shadow);
+        }
+        
+        /* ========== 全新设计的 Hero Header ========== */
+        .hero-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2.5rem 1rem;
+            position: relative;
+        }
+
+        .hero-title-card {
+            display: inline-block;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            padding: 2rem 4rem;
+            border-radius: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+            transition: transform 0.5s ease;
+        }
+        
+        [data-theme="dark"] .hero-title-card {
+             box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .hero-title-card:hover {
+            transform: scale(1.02);
+        }
+
+        .main-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+            background: var(--title-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            line-height: 1.2;
+        }
+
+        .sub-title {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.9;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .sub-title::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: var(--title-gradient);
+            margin: 10px auto 0;
+            border-radius: 2px;
+            opacity: 0.6;
         }
 
         /* 公告样式 */
-        .notice-yellow {
-            background: #fff9c4;
-            border-left: 4px solid #fbc02d;
-            padding: 0.8rem 1.2rem;
+        .notice-yellow, .notice-blue, .notice-pink {
+            padding: 0.9rem 1.2rem;
             border-radius: 1rem;
             margin-bottom: 0.8rem;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
         }
-
+        
         .notice-blue {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 0.8rem 1.2rem;
-            border-radius: 1rem;
-            margin-bottom: 0.8rem;
+            background: var(--notice-blue-bg);
+            border-left-color: var(--notice-blue-border);
+            color: var(--notice-blue-text);
         }
-
+        
         .notice-pink {
-            background: #fce4ec;
-            border-left: 4px solid #e91e63;
-            padding: 0.8rem 1.2rem;
-            border-radius: 1rem;
-            margin-bottom: 0.8rem;
+            background: var(--notice-pink-bg);
+            border-left-color: var(--notice-pink-border);
+            color: var(--notice-pink-text);
         }
-
+        
+        .notice-yellow {
+            background: var(--notice-yellow-bg);
+            border-left-color: var(--notice-yellow-border);
+            color: var(--notice-yellow-text);
+        }
+        
         /* 两栏布局 */
         .row {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 2rem;
         }
-
+        
         .col {
             flex: 1;
-            min-width: 240px;
+            min-width: 280px;
         }
-
-        /* 区块标题 */
+        
+        /* 区块标题（玻璃态） */
         .section-title {
-            background: #f0e6ff;
-            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 0.6rem 1rem;
             border-radius: 2rem;
             text-align: center;
             font-weight: bold;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6);
+            transition: all 0.3s ease;
         }
 
-        .section-title.green { background: #d4edda; }
-        .section-title.yellow { background: #fff3cd; }
-
+        [data-theme="dark"] .section-title {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        
         /* 链接列表 */
         .link-list {
             list-style: none;
         }
-
+        
         .link-list li {
-            margin: 0.6rem 0;
+            margin: 0.8rem 0;
         }
-
+        
         .link-list a {
             display: block;
-            padding: 0.7rem 1rem;
-            background: #f8f9fa;
+            padding: 0.8rem 1.2rem;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border-radius: 1rem;
             text-decoration: none;
-            color: #333;
-            transition: all 0.2s;
-            border: 1px solid #eee;
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5);
         }
-
+        
         .link-list a:hover {
-            background: #667eea;
-            color: white;
-            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+            border-color: rgba(255, 255, 255, 0.6);
         }
 
-        /* 倒计时代码块样式 */
-        .code-block {
-            background: #1e1e2e;
-            color: #abb2bf;
-            padding: 1rem;
-            border-radius: 1rem;
-            font-family: monospace;
-            font-size: 0.85rem;
-            margin: 1rem 0;
+        [data-theme="dark"] .link-list a {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
         }
 
-        .code-line {
-            margin: 0.3rem 0;
+        [data-theme="dark"] .link-list a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            border-color: rgba(255, 255, 255, 0.2);
         }
-
-        .code-line .blue { color: #61afef; }
-        .code-line .red { color: #e06c75; }
-        .code-line .orange { color: #d19a66; }
-
+        
         /* 页脚 */
         footer {
             text-align: center;
-            padding: 1.5rem;
-            color: rgba(255,255,255,0.8);
-            font-size: 0.8rem;
+            padding: 2rem 1rem 1rem;
+            color: var(--footer-text);
+            font-size: 0.85rem;
+        }
+        
+        /* ========== 主题切换按钮 ========== */
+        .theme-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: var(--glass-shadow), var(--glass-inner-highlight);
+            transition: all 0.3s ease;
+            z-index: 1000;
         }
 
-        hr {
-            margin: 1rem 0;
-            border: none;
-            border-top: 1px solid #eee;
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        .theme-icon {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] .theme-icon {
+            transform: rotate(360deg);
+        }
+
+        /* 响应式微调 */
+        @media (max-width: 600px) {
+            body { padding: 2rem 1rem; }
+            .card { padding: 1.2rem; margin-bottom: 1.5rem; }
+            .row { gap: 1.5rem; }
+            
+            .hero-title-card {
+                padding: 1.5rem 2rem;
+                width: 90%;
+            }
+            .main-title {
+                font-size: 2.2rem;
+            }
+            .sub-title {
+                font-size: 0.9rem;
+                letter-spacing: 2px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- 公告区 -->
-    <div class="card">
-        <div class="notice-blue">
-            📢 【公告】由于钉钉个人版的下架，目前站主正在筹备转移至GitHub，本网站所有数据已于5月30日导出，届时本网站还会正常运行
-        </div>
-        <div class="notice-pink">
-            💡 Hello World！写写代码，做做设计，看看产品。人是一根会思考的芦苇。
-        </div>
-    </div>
+    <!-- 背景装饰色块 -->
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
 
-    <!-- 倒计时区块 -->
-    <div class="card">
-        <div class="code-block">
-            <div class="code-line">title 网站已经运行 day count: <span class="blue" id="runDays">--</span> 天</div>
-            <div class="code-line">title 距离开学还有 day count: <span class="blue" id="schoolDays">--</span> 天</div>
-        </div>
-    </div>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" title="切换主题">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+    </button>
 
-    <!-- 两栏：PAGES + PROJECTS -->
-    <div class="row">
-        <!-- 左侧 PAGES -->
-        <div class="col">
-            <div class="card">
-                <div class="section-title yellow">📄 PAGES</div>
-                <p style="text-align: center; color: #666; margin-bottom: 1rem;">这里是我写的文章</p>
-                <ul class="link-list">
-                    <li><a href="#">📖 教程专区</a></li>
-                    <li><a href="#">📷 摄影专区</a></li>
-                    <li><a href="#">🕰️ 早期页面</a></li>
-                </ul>
+    <div class="container">
+        <!-- 全新设计的 Hero Header -->
+        <header class="hero-header">
+            <div class="hero-title-card">
+                <h1 class="main-title">Veyra's Space</h1>
+                <div class="sub-title">保持热爱 &nbsp; 前行不辍</div>
+            </div>
+        </header>
+
+        <!-- 公告区 -->
+        <div class="card">
+            <div class="notice-blue">
+                📢 【公告】由于钉钉个人版的下架，目前站主正在筹备转移至GitHub，本网站所有数据已于5月30日导出，届时本网站还会正常运行
+            </div>
+            <div class="notice-pink">
+                💡 Hello World！写写代码，做做设计，看看产品。人是一根会思考的芦苇。
             </div>
         </div>
-
-        <!-- 右侧 PROJECTS -->
-        <div class="col">
-            <div class="card">
-                <div class="section-title green">🚀 PROJECTS</div>
-                <p style="text-align: center; color: #666; margin-bottom: 1rem;">这里是我做的一些项目</p>
-                <div class="notice-pink" style="margin-bottom: 1rem; font-size: 0.85rem;">
-                    ⚠️ 开发者尚未成年，有些地方做得不尽完美，敬请谅解
+        
+        <!-- 两栏：PAGES + PROJECTS -->
+        <div class="row">
+            <!-- 左侧 PAGES -->
+            <div class="col">
+                <div class="card">
+                    <div class="section-title">📄 PAGES</div>
+                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem;">这里是我写的文章</p>
+                    <ul class="link-list">
+                        <li><a href="#">📖 教程专区</a></li>
+                        <li><a href="#">📷 摄影专区</a></li>
+                        <li><a href="#">🕰️ 早期页面</a></li>
+                    </ul>
                 </div>
-                <ul class="link-list">
-                    <li><a href="#">🤖 AI黑飞识别分析助理（正在完善）</a></li>
-                </ul>
+            </div>
+            
+            <!-- 右侧 PROJECTS -->
+            <div class="col">
+                <div class="card">
+                    <div class="section-title">🚀 PROJECTS</div>
+                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem;">这里是我做的一些项目</p>
+                    <div class="notice-pink" style="margin-bottom: 1.2rem; font-size: 0.85rem;">
+                        ⚠️ 开发者尚未成年，有些地方做得不尽完美，敬请谅解
+                    </div>
+                    <ul class="link-list">
+                        <li><a href="#">🤖 AI黑飞识别分析助理（正在完善）</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
+        
+        <!-- 关于 -->
+        <div class="card">
+            <div class="section-title">ℹ️ 关于 Veyra's Space</div>
+            <p style="margin-top: 0.5rem; line-height: 1.7; color: var(--text-primary); text-align: center; font-size: 1.05rem;">
+                这里是 Veyra 的个人空间，分享技术学习、摄影作品和日常思考。
+            </p>
+        </div>
+        
+        <footer>
+            © 2026 Veyra's Space · 由 GitHub Pages 提供支持
+        </footer>
     </div>
 
-    <!-- 关于 -->
-    <div class="card">
-        <div class="section-title" style="background: #e8e8e8;">ℹ️ 关于 Veyra's Space</div>
-        <p style="margin-top: 0.8rem; line-height: 1.6;">
-            这里是 Veyra 的个人空间，分享技术学习、摄影作品和日常思考。
-        </p>
-    </div>
+    <script>
+        // ========== 主题切换逻辑 ==========
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
 
-    <footer>
-        © 2026 Veyra's Space · 由 GitHub Pages 提供支持
-    </footer>
-</div>
+        function getInitialTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) return savedTheme;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
 
-<script>
-    // 倒计时函数
-    function getDaysDiff(targetDate) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const target = new Date(targetDate);
-        target.setHours(0, 0, 0, 0);
-        const diffTime = target - today;
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    }
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', theme);
+        }
 
-    function getRunDays() {
-        const start = new Date('2024-01-20');
-        const today = new Date();
-        const diffTime = today - start;
-        return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    }
+        applyTheme(getInitialTheme());
 
-    // 更新显示
-    document.getElementById('runDays').innerText = getRunDays();
-    document.getElementById('schoolDays').innerText = getDaysDiff('2026-09-01');
-</script>
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+    </script>
 </body>
 </html>
